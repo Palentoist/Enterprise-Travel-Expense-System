@@ -37,6 +37,7 @@ const Approvals = () => {
       fetchApprovals()
       fetchManagers()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   useEffect(() => {

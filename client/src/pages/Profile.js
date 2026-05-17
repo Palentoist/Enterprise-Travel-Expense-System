@@ -190,7 +190,7 @@ const Profile = () => {
     setUploadingPic(true)
     setUploadError("")
     try {
-      const res = await axios.delete(`/api/users/${user.id}/profile-picture`)
+      await axios.delete(`/api/users/${user.id}/profile-picture`)
       toast.success('Profile picture removed')
       // Update user state with undefined values to clear the profile picture
       updateUser({ profilePicture: undefined, profilePicturePublicId: undefined })

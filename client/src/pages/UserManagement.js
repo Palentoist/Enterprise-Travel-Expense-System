@@ -2,11 +2,10 @@ import { useState, useEffect } from "react"
 import { useAuth } from "../contexts/AuthContext"
 import axios from "axios"
 import { toast } from "react-hot-toast"
-import { UserCircleIcon, MagnifyingGlassIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline"
-import { Menu } from "@headlessui/react"
+import { MagnifyingGlassIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline"
 import { ChevronDownIcon } from "@heroicons/react/24/outline"
 import { Dialog } from '@headlessui/react'
-import { PencilIcon, TrashIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline'
+import { TrashIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import Pagination from "../components/Pagination"
 
 const UserManagement = () => {
@@ -14,7 +13,6 @@ const UserManagement = () => {
   const [users, setUsers] = useState([])
   const [managers, setManagers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
   const [showCreate, setShowCreate] = useState(false)
   const [newUser, setNewUser] = useState({
     email: "",
@@ -27,7 +25,7 @@ const UserManagement = () => {
     isActive: true,
   })
   const [creating, setCreating] = useState(false)
-  const [updatingId, setUpdatingId] = useState(null)
+
   const [searchTerm, setSearchTerm] = useState("")
   const [actionUser, setActionUser] = useState(null)
   const [showActionModal, setShowActionModal] = useState(false)
@@ -52,12 +50,11 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     setLoading(true)
-    setError("")
     try {
       const res = await axios.get("/api/users")
       setUsers(res.data.users)
     } catch (err) {
-      setError("Failed to fetch users")
+      // ignore
     } finally {
       setLoading(false)
     }
@@ -93,7 +90,6 @@ const UserManagement = () => {
   const handleUpdateUser = async (id, updates) => {
     if (assigningManager) return;
     if (updates.manager !== undefined) setAssigningManager(true);
-    setUpdatingId(id);
     try {
       const payload = { ...updates, manager: updates.manager === "" ? undefined : updates.manager };
       await axios.patch(`/api/users/${id}`, payload);
@@ -124,21 +120,10 @@ const UserManagement = () => {
       }
     } finally {
       if (updates.manager !== undefined) setAssigningManager(false);
-      setUpdatingId(null);
     }
   };
 
-  const getPasswordStrength = (password) => {
-    let score = 0
-    if (password.length >= 8) score++
-    if (/[A-Z]/.test(password)) score++
-    if (/[a-z]/.test(password)) score++
-    if (/[0-9]/.test(password)) score++
-    if (/[^A-Za-z0-9]/.test(password)) score++
-    if (score <= 2) return { label: "Weak", color: "bg-red-500" }
-    if (score === 3 || score === 4) return { label: "Medium", color: "bg-yellow-500" }
-    return { label: "Strong", color: "bg-green-500" }
-  }
+
 
   const getRoleBadge = (role, isPermanent) => {
     if (isPermanent) return <span className="badge badge-superadmin" title="Super Admin">👑 Super Admin</span>;

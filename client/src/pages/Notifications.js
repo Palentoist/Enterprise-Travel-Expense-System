@@ -1,12 +1,8 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import { BellIcon, CheckIcon } from "@heroicons/react/24/outline"
-import { useAuth } from "../contexts/AuthContext"
-import LoadingSpinner from "../components/LoadingSpinner"
 import axios from "axios"
-import toast from "react-hot-toast"
-import { io } from "socket.io-client"
 import { useNotifications } from "../contexts/NotificationContext"
 import Pagination from "../components/Pagination"
 
@@ -21,8 +17,7 @@ const formatDate = (dateStr) => {
 }
 
 const Notifications = () => {
-  const { user } = useAuth()
-  const { notifications, unreadCount, loading, error, markAsRead, markAllAsRead, setNotifications } = useNotifications()
+  const { notifications, unreadCount, loading, markAsRead, markAllAsRead, setNotifications } = useNotifications()
   const [filter, setFilter] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 8

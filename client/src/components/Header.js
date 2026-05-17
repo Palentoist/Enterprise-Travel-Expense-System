@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState } from "react"
 import { Bars3Icon, BellIcon, SunIcon, MoonIcon, UserCircleIcon } from "@heroicons/react/24/outline"
 import { useAuth } from "../contexts/AuthContext"
 import { useTheme } from "../contexts/ThemeContext"
-import axios from "axios"
-import { io } from "socket.io-client"
 import { useNotifications } from "../contexts/NotificationContext"
 import { useNavigate } from "react-router-dom"
 

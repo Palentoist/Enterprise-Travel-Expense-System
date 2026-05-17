@@ -16,9 +16,7 @@ import axios from "axios"
 import toast from "react-hot-toast"
 import Pagination from "../components/Pagination"
 
-// Helper to check if a file is an image
-const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
-const isPDF = (url) => /\.pdf$/i.test(url)
+
 
 // Helper to check if request is fully finalized (either admin acted or both agree)
 const isRequestFinalized = (request) => (
@@ -69,7 +67,6 @@ const TravelRequests = () => {
   const [actionComments, setActionComments] = useState({})
   const [viewAll, setViewAll] = useState(user?.role === "Manager")
   const [dateError, setDateError] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
   const [documentFile, setDocumentFile] = useState(null)
   const [documentError, setDocumentError] = useState(false)
   const [documentPreview, setDocumentPreview] = useState(null)
@@ -78,7 +75,6 @@ const TravelRequests = () => {
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
-  const HEADER_HEIGHT = 80;
   const modalRef = useRef();
 
   useEffect(() => {
@@ -90,6 +86,7 @@ const TravelRequests = () => {
 
   useEffect(() => {
     fetchTravelRequests()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, viewAll])
 
   useEffect(() => {
@@ -138,7 +135,6 @@ const TravelRequests = () => {
     }
     setDateError(false)
     setDocumentError(false)
-    setSubmitting(true)
     setDocumentUploading(true)
     try {
       const res = await axios.post("/api/travel", formData)
@@ -171,7 +167,6 @@ const TravelRequests = () => {
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to submit travel request")
     } finally {
-      setSubmitting(false)
       setDocumentUploading(false)
     }
   }

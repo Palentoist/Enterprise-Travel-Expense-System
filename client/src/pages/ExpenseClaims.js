@@ -60,8 +60,6 @@ const ExpenseClaims = () => {
   const [actionComments, setActionComments] = useState({})
   const [viewAll, setViewAll] = useState(user?.role === "Manager")
   const [previewUrl, setPreviewUrl] = useState(null)
-  const [receiptImgError, setReceiptImgError] = useState(false)
-  const HEADER_HEIGHT = 80;
   const modalRef = useRef();
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [receiptPreview, setReceiptPreview] = useState(null)
@@ -80,6 +78,7 @@ const ExpenseClaims = () => {
   useEffect(() => {
     fetchExpenseClaims()
     fetchApprovedTravelRequests()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter, viewAll])
 
   useEffect(() => {
@@ -228,31 +227,7 @@ const ExpenseClaims = () => {
     Miscellaneous: "📋",
   }
 
-  // Helper to format date as DD/MM/YYYY
-  const formatDate = (dateStr) => {
-    if (!dateStr) return ''
-    const date = new Date(dateStr)
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
-  }
 
-  // Helper to format date+time as DD/MM/YYYY HH:mm
-  const formatDateTime = (dateStr) => {
-    if (!dateStr) return ''
-    const date = new Date(dateStr)
-    const day = String(date.getDate()).padStart(2, '0')
-    const month = String(date.getMonth() + 1).padStart(2, '0')
-    const year = date.getFullYear()
-    const hours = String(date.getHours()).padStart(2, '0')
-    const minutes = String(date.getMinutes()).padStart(2, '0')
-    return `${day}/${month}/${year} ${hours}:${minutes}`
-  }
-
-  // Helper to check if a file is an image
-  const isImage = (url) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url)
-  const isPDF = (url) => /\.pdf$/i.test(url)
 
   // Helper to check if claim is fully finalized (both agree)
   const isClaimFinalized = (claim) => (
