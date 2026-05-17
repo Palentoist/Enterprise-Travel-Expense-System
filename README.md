@@ -85,8 +85,7 @@ Enterprise Travel & Expense Management System is designed for modern organizatio
 **Backend:**
 - Node.js (runtime)
 - Express.js (REST API framework)
-- MongoDB (NoSQL database)
-- Mongoose (ODM for MongoDB)
+- PostGres (database)
 - Socket.IO (real-time communication)
 - Nodemailer (email notifications)
 - JWT (authentication)
