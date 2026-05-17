@@ -159,7 +159,7 @@ npm start
 ### Server (`server/.env`)
 ```env
 PORT=4000
-MONGODB_URI=your_mongodb_connection_string
+POSTGRES_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
 EMAIL_USER=your_email@example.com
 EMAIL_PASS=your_email_password
@@ -288,7 +288,7 @@ Enterprise-Travel-Expense-System/
 This project demonstrates:
 - Real-world enterprise workflow automation
 - Security best practices (JWT, helmet, bcrypt, rate limiting)
-- Modular, scalable codebase (MERN stack)
+- Modular, scalable codebase (PERN stack)
 - Professional UI/UX and responsive design
 - Practical features for HR, finance, and admin teams
 
@@ -296,14 +296,8 @@ This project demonstrates:
 
 ## 👤 Author
 
-**Kush Varshney**  
-B.Tech CSE | Full Stack Developer  
-[Portfolio](https://kushvarshney.vercel.app/) • [GitHub](https://github.com/Kush-Varshney) • [LinkedIn](https://www.linkedin.com/in/kush-varshney-490baa250/)
-
----
-
-## 📄 License
-
-MIT License
+**Shawaiz Ali Shah**  
+BSCS NUML University | Full Stack Developer  
+[Portfolio](https://kushvarshney.vercel.app/) • [GitHub](https://github.com/Kush-Varshney)
 
 ---
