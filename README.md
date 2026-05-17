@@ -298,6 +298,6 @@ This project demonstrates:
 
 **Shawaiz Ali Shah**  
 BSCS NUML University | Full Stack Developer  
-[Portfolio](https://kushvarshney.vercel.app/) • [GitHub](https://github.com/Kush-Varshney)
+[Portfolio](https://github.com/Palentoist) • [GitHub](https://github.com/Palentoist)
 
 ---
