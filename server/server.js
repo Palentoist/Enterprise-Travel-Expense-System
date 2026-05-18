@@ -11,6 +11,11 @@ const path = require('path')
 // Load environment variables
 dotenv.config()
 
+// Normalize CLIENT_URL to remove any trailing slash
+if (process.env.CLIENT_URL && process.env.CLIENT_URL.endsWith('/')) {
+  process.env.CLIENT_URL = process.env.CLIENT_URL.slice(0, -1)
+}
+
 // Initialize PostgreSQL pool (imported for side-effect: opens pool on startup)
 require('./db')
 
