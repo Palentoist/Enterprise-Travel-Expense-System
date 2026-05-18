@@ -25,7 +25,6 @@ const UserManagement = () => {
     isActive: true,
   })
   const [creating, setCreating] = useState(false)
-
   const [searchTerm, setSearchTerm] = useState("")
   const [actionUser, setActionUser] = useState(null)
   const [showActionModal, setShowActionModal] = useState(false)
