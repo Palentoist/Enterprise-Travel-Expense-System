@@ -57,6 +57,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+if (process.env.VERCEL || process.env.NOW_BUILDER) {
+  app.use('/uploads', express.static('/tmp'))
+}
 
 // Middleware to recursively map PostgreSQL "id" to MongoDB style "_id" in JSON responses
 // for frontend compatibility
@@ -121,6 +124,12 @@ app.set('connectedUsers', connectedUsers)
 // Global error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack)
+
+  // If it's a multer error or our custom file format/size validation error, return 400 Bad Request
+  if (err.message && (err.message.includes('allowed') || err.message.includes('file') || err.name === 'MulterError' || err.message.includes('limit') || err.message.includes('large'))) {
+    return res.status(400).json({ message: err.message })
+  }
+
   res.status(500).json({
     message: process.env.NODE_ENV === 'production' ? 'Something went wrong!' : err.message,
   })

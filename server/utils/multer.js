@@ -2,7 +2,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-const allowedFormats = ['jpg', 'jpeg', 'png']; // Only images
+const allowedFormats = ['jpg', 'jpeg', 'png', 'pdf']; // Allow images and PDFs
 const maxSize = 5 * 1024 * 1024; // 5MB
 
 const isCloudinaryConfigured = process.env.CLOUDINARY_CLOUD_NAME && 
@@ -24,16 +24,22 @@ if (isCloudinaryConfigured) {
       if (req.baseUrl.includes('expense')) folder = 'expense_docs';
       return {
         folder,
-        resource_type: 'image',
-        format: file.mimetype.split('/')[1] === 'jpeg' ? 'jpg' : file.mimetype.split('/')[1],
+        resource_type: 'auto',
       };
     },
   });
 } else {
   // Fallback to local disk storage
-  const uploadsDir = path.join(__dirname, '../uploads');
-  if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+  let uploadsDir = path.join(__dirname, '../uploads');
+  
+  // On serverless environments like Vercel, use /tmp since the app directory is read-only
+  const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
+  if (isVercel) {
+    uploadsDir = '/tmp';
+  } else {
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
   }
   
   storage = multer.diskStorage({
@@ -52,7 +58,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedFormats.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only JPG, JPEG, and PNG image files are allowed!'), false);
+    cb(new Error('Only JPG, JPEG, PNG, and PDF files are allowed!'), false);
   }
 };
 

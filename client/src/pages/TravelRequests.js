@@ -577,18 +577,18 @@ const TravelRequests = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supporting Document</label>
-                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Only JPG, JPEG, or PNG files are allowed (Max size: 5MB).</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Only JPG, JPEG, PNG, or PDF files are allowed (Max size: 5MB).</span>
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/jpg"
+                  accept="image/jpeg,image/png,image/jpg,application/pdf"
                   onChange={e => {
                     setDocumentUploadError("");
                     const file = e.target.files[0];
                     if (!file) return;
                     // Validate file type
-                    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
+                    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
                     if (!allowedTypes.includes(file.type)) {
-                      setDocumentUploadError("Only JPG, JPEG, and PNG image files are allowed.");
+                      setDocumentUploadError("Only JPG, JPEG, PNG, and PDF files are allowed.");
                       setDocumentFile(null);
                       setDocumentPreview(null);
                       return;
@@ -602,16 +602,27 @@ const TravelRequests = () => {
                     }
                     setDocumentFile(file);
                     setDocumentError(false);
-                    const reader = new FileReader();
-                    reader.onloadend = () => setDocumentPreview(reader.result);
-                    reader.readAsDataURL(file);
+                    if (file.type === "application/pdf") {
+                      setDocumentPreview("pdf");
+                    } else {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setDocumentPreview(reader.result);
+                      reader.readAsDataURL(file);
+                    }
                   }}
                   className={`input-field${documentError || documentUploadError ? ' border-red-500' : ''}`}
                   required
                 />
                 {documentPreview && (
                   <div className="mt-2">
-                    <img src={documentPreview} alt="Preview" className="w-24 h-24 object-cover rounded border mt-1" />
+                    {documentPreview === "pdf" ? (
+                      <div className="flex items-center gap-2 p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 w-fit">
+                        <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6l-4-4H9z" /><path d="M5 6v10a2 2 0 002 2h8a2 2 0 002-2h-2a4 4 0 01-4-4V6H7a2 2 0 00-2 2z" /></svg>
+                        <span className="text-sm font-medium">{documentFile?.name || "PDF Document"}</span>
+                      </div>
+                    ) : (
+                      <img src={documentPreview} alt="Preview" className="w-24 h-24 object-cover rounded border mt-1" />
+                    )}
                   </div>
                 )}
                 {documentUploadError && (
