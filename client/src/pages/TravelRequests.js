@@ -65,11 +65,7 @@ const TravelRequests = () => {
   const [actionComments, setActionComments] = useState({})
   const [viewAll, setViewAll] = useState(user?.role === "Manager")
   const [dateError, setDateError] = useState(false)
-  const [documentFile, setDocumentFile] = useState(null)
-  const [documentError, setDocumentError] = useState(false)
-  const [documentPreview, setDocumentPreview] = useState(null)
-  const [documentUploadError, setDocumentUploadError] = useState("")
-  const [documentUploading, setDocumentUploading] = useState(false)
+
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
@@ -121,33 +117,16 @@ const TravelRequests = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!documentFile) {
-      setDocumentError(true)
-      toast.error("Supporting document is required. Please upload a document to submit your request.")
-      return
-    }
     if (formData.startDate && formData.endDate && new Date(formData.startDate) > new Date(formData.endDate)) {
       setDateError(true)
       toast.error("End date cannot be before start date. Please correct the date range and try again.", { duration: 4000 })
       return
     }
     setDateError(false)
-    setDocumentError(false)
-    setDocumentUploading(true)
+    setLoading(true)
     try {
       const res = await axios.post("/api/travel", formData)
-      let newRequest = res.data
-      if (documentFile) {
-        const fileData = new FormData()
-        fileData.append("document", documentFile)
-        const uploadRes = await axios.post(`/api/travel/${newRequest._id}/document`, fileData, {
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: (progressEvent) => {
-            // Optionally, you can set a progress state here
-          },
-        })
-        newRequest = uploadRes.data
-      }
+      const newRequest = res.data
       setRequests([newRequest, ...requests])
       setShowModal(false)
       setFormData({
@@ -158,14 +137,12 @@ const TravelRequests = () => {
         estimatedCost: "",
         priority: "Medium",
       })
-      setDocumentFile(null)
-      setDocumentPreview(null)
       if (user?.role === "Manager") setViewAll(false)
       toast.success("Travel request submitted successfully! You will be notified once it's reviewed.")
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to submit travel request")
     } finally {
-      setDocumentUploading(false)
+      setLoading(false)
     }
   }
 
@@ -575,65 +552,7 @@ const TravelRequests = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supporting Document</label>
-                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Only JPG, JPEG, PNG, or PDF files are allowed (Max size: 5MB).</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg,application/pdf"
-                  onChange={e => {
-                    setDocumentUploadError("");
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    // Validate file type
-                    const allowedTypes = ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
-                    if (!allowedTypes.includes(file.type)) {
-                      setDocumentUploadError("Only JPG, JPEG, PNG, and PDF files are allowed.");
-                      setDocumentFile(null);
-                      setDocumentPreview(null);
-                      return;
-                    }
-                    // Validate file size
-                    if (file.size > 5 * 1024 * 1024) {
-                      setDocumentUploadError("File size must be 5MB or less.");
-                      setDocumentFile(null);
-                      setDocumentPreview(null);
-                      return;
-                    }
-                    setDocumentFile(file);
-                    setDocumentError(false);
-                    if (file.type === "application/pdf") {
-                      setDocumentPreview("pdf");
-                    } else {
-                      const reader = new FileReader();
-                      reader.onloadend = () => setDocumentPreview(reader.result);
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className={`input-field${documentError || documentUploadError ? ' border-red-500' : ''}`}
-                  required
-                />
-                {documentPreview && (
-                  <div className="mt-2">
-                    {documentPreview === "pdf" ? (
-                      <div className="flex items-center gap-2 p-2 border rounded bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 w-fit">
-                        <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6l-4-4H9z" /><path d="M5 6v10a2 2 0 002 2h8a2 2 0 002-2h-2a4 4 0 01-4-4V6H7a2 2 0 00-2 2z" /></svg>
-                        <span className="text-sm font-medium">{documentFile?.name || "PDF Document"}</span>
-                      </div>
-                    ) : (
-                      <img src={documentPreview} alt="Preview" className="w-24 h-24 object-cover rounded border mt-1" />
-                    )}
-                  </div>
-                )}
-                {documentUploadError && (
-                  <div className="text-xs text-red-500 mt-1">{documentUploadError}</div>
-                )}
-                {documentUploading && (
-                  <div className="mt-2 flex items-center text-xs text-gray-500">
-                    <span className="loading-spinner mr-2"></span>Uploading document...
-                  </div>
-                )}
-              </div>
+
 
               <div className="flex justify-end gap-2 pt-4 sticky bottom-0 bg-white dark:bg-gray-900 pb-2 z-10">
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
@@ -831,15 +750,6 @@ const TravelRequests = () => {
                 )}
               </div>
             </div>
-          </div>
-        </div>
-      )}
-      {documentUploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 flex flex-col items-center">
-            <span className="loading-spinner mb-4"></span>
-            <div className="text-lg font-semibold text-gray-800 dark:text-gray-100">Uploading your document...</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">Please wait while we process your file.</div>
           </div>
         </div>
       )}

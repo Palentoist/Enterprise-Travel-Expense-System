@@ -55,16 +55,11 @@ const ExpenseClaims = () => {
     expenseDate: "",
     category: "Transportation",
   })
-  const [receiptFile, setReceiptFile] = useState(null)
-  const [receiptError, setReceiptError] = useState(false)
   const [actionComments, setActionComments] = useState({})
   const [viewAll, setViewAll] = useState(user?.role === "Manager")
   const [previewUrl, setPreviewUrl] = useState(null)
   const modalRef = useRef();
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
-  const [receiptPreview, setReceiptPreview] = useState(null)
-  const [receiptUploadError, setReceiptUploadError] = useState("")
-  const [receiptUploading, setReceiptUploading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -128,30 +123,10 @@ const ExpenseClaims = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!receiptFile) {
-      setReceiptError(true)
-      toast.error("Receipt is required. Please upload a receipt to submit your claim.")
-      return
-    }
-    setReceiptError(false)
-    setReceiptUploading(true)
     try {
       if (loading) return
       setLoading(true)
-      const res = await axios.post("/api/expense", formData)
-      let newClaim = res.data
-      // If a file is selected, upload it
-      if (receiptFile) {
-        const fileData = new FormData()
-        fileData.append("receipt", receiptFile)
-        const uploadRes = await axios.post(`/api/expense/${newClaim._id}/receipt`, fileData, {
-          headers: { "Content-Type": "multipart/form-data" },
-          onUploadProgress: (progressEvent) => {
-            // Optionally, you can set a progress state here
-          },
-        })
-        newClaim = uploadRes.data
-      }
+      await axios.post("/api/expense", formData)
       await fetchExpenseClaims();
       setShowModal(false)
       setFormData({
@@ -161,15 +136,12 @@ const ExpenseClaims = () => {
         expenseDate: "",
         category: "Transportation",
       })
-      setReceiptFile(null)
-      setReceiptPreview(null)
       if (user?.role === "Manager") setViewAll(false)
       toast.success("Expense claim submitted successfully!")
     } catch (error) {
       toast.error(error?.response?.data?.message || "Failed to submit expense claim")
     } finally {
       setLoading(false)
-      setReceiptUploading(false)
     }
   }
 
@@ -606,54 +578,7 @@ const ExpenseClaims = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Receipt</label>
-                <span className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Only JPG, JPEG, or PNG files are allowed (Max size: 5MB).</span>
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/jpg"
-                  onChange={e => {
-                    setReceiptUploadError("");
-                    const file = e.target.files[0];
-                    if (!file) return;
-                    // Validate file type
-                    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-                    if (!allowedTypes.includes(file.type)) {
-                      setReceiptUploadError("Only JPG, JPEG, and PNG image files are allowed.");
-                      setReceiptFile(null);
-                      setReceiptPreview(null);
-                      return;
-                    }
-                    // Validate file size
-                    if (file.size > 5 * 1024 * 1024) {
-                      setReceiptUploadError("File size must be 5MB or less.");
-                      setReceiptFile(null);
-                      setReceiptPreview(null);
-                      return;
-                    }
-                    setReceiptFile(file);
-                    setReceiptError(false);
-                    const reader = new FileReader();
-                    reader.onloadend = () => setReceiptPreview(reader.result);
-                    reader.readAsDataURL(file);
-                  }}
-                  className={`input-field${receiptError || receiptUploadError ? ' border-red-500' : ''}`}
-                  required
-                />
-                {receiptPreview && (
-                  <div className="mt-2">
-                    <img src={receiptPreview} alt="Preview" className="w-24 h-24 object-cover rounded border mt-1" />
-                  </div>
-                )}
-                {receiptUploadError && (
-                  <div className="text-xs text-red-500 mt-1">{receiptUploadError}</div>
-                )}
-                {receiptUploading && (
-                  <div className="mt-2 flex items-center text-xs text-gray-500">
-                    <span className="loading-spinner mr-2"></span>Uploading receipt...
-                  </div>
-                )}
-              </div>
+
 
               <div className="flex justify-end gap-2 pt-4 sticky bottom-0 bg-white dark:bg-gray-900 pb-2 z-10">
                 <button type="button" className="btn-secondary" onClick={() => setShowModal(false)}>
@@ -866,15 +791,6 @@ const ExpenseClaims = () => {
             >
               <XMarkIcon className="h-6 w-6 text-gray-700" />
             </button>
-          </div>
-        </div>
-      )}
-      {receiptUploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8 flex flex-col items-center">
-            <span className="loading-spinner mb-4"></span>
-            <div className="text-lg font-semibold text-gray-800 dark:text-gray-100">Uploading your document...</div>
-            <div className="text-sm text-gray-500 dark:text-gray-400 mt-2">Please wait while we process your file.</div>
           </div>
         </div>
       )}
