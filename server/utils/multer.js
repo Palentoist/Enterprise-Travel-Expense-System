@@ -1,6 +1,5 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
 const allowedFormats = ['jpg', 'jpeg', 'png', 'pdf']; // Allow images and PDFs
 const maxSize = 5 * 1024 * 1024; // 5MB
@@ -29,28 +28,8 @@ if (isCloudinaryConfigured) {
     },
   });
 } else {
-  // Fallback to local disk storage
-  let uploadsDir = path.join(__dirname, '../uploads');
-  
-  // On serverless environments like Vercel, use /tmp since the app directory is read-only
-  const isVercel = process.env.VERCEL || process.env.NOW_BUILDER;
-  if (isVercel) {
-    uploadsDir = '/tmp';
-  } else {
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-  }
-  
-  storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadsDir);
-    },
-    filename: (req, file, cb) => {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-  });
+  // Use memory storage for clean base64 storage fallback (supports Vercel serverless perfectly)
+  storage = multer.memoryStorage();
 }
 
 const fileFilter = (req, file, cb) => {
@@ -68,7 +47,7 @@ const upload = multer({
   limits: { fileSize: maxSize },
 });
 
-// Wrap upload.single to normalize req.file.path to a relative URL for local uploads
+// Wrap upload.single to convert req.file to a Base64 data URI when using memory storage fallback
 const originalSingle = upload.single;
 upload.single = function (fieldName) {
   const middleware = originalSingle.call(upload, fieldName);
@@ -76,7 +55,9 @@ upload.single = function (fieldName) {
     middleware(req, res, (err) => {
       if (err) return next(err);
       if (req.file && !isCloudinaryConfigured) {
-        req.file.path = `/uploads/${req.file.filename}`;
+        // Convert memory buffer to Base64 data URL
+        const base64Str = req.file.buffer.toString('base64');
+        req.file.path = `data:${req.file.mimetype};base64,${base64Str}`;
       }
       next();
     });

@@ -811,16 +811,23 @@ const TravelRequests = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Supporting Document</label>
                 {selectedRequest.documentUrl ? (
-                  <a href={selectedRequest.documentUrl} target="_blank" rel="noopener noreferrer">
-                    <img
-                      src={selectedRequest.documentUrl}
-                      alt="Document"
-                      style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 6, border: '1px solid #ccc' }}
-                      onError={e => { e.target.onerror = null; e.target.src = ''; e.target.alt = 'File not found'; }}
-                    />
+                  <a href={selectedRequest.documentUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-2">
+                    {selectedRequest.documentUrl.includes('application/pdf') || selectedRequest.documentUrl.endsWith('.pdf') ? (
+                      <div className="flex items-center gap-2 p-3 border rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                        <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path d="M9 2a2 2 0 00-2 2v8a2 2 0 002 2h6a2 2 0 002-2V6l-4-4H9z" /><path d="M5 6v10a2 2 0 002 2h8a2 2 0 002-2h-2a4 4 0 01-4-4V6H7a2 2 0 00-2 2z" /></svg>
+                        <span className="text-sm font-medium">View PDF Document</span>
+                      </div>
+                    ) : (
+                      <img
+                        src={selectedRequest.documentUrl}
+                        alt="Document"
+                        style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 6, border: '1px solid #ccc' }}
+                        onError={e => { e.target.onerror = null; e.target.src = ''; e.target.alt = 'File not found'; }}
+                      />
+                    )}
                   </a>
                 ) : (
-                  <span className="text-gray-400">No document uploaded</span>
+                  <span className="text-gray-400 block mt-1">No document uploaded</span>
                 )}
               </div>
             </div>
